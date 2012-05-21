@@ -1,22 +1,10 @@
 Route For HTML/OS
 ========================
-Two Simple Illustrations
+Why?
 ------------------------
 _Consider these two URL's_
 <ol type="a"><li>http://example.com/blog</li>
 <li>http://example.com/cgi-bin/htmlos.cgi/001149.3.317303135718820096/blog</li></ol>
-
-_Consider this telephone conversation between Tom and Bill._
-
-Tom: <i>Hey Bob do you remember that cool blaster watergun we were looking at the other day on the internet?</i>
-
-Bill: <i>Yes, I do. It was pretty cool. Wait! I have it here. I am so glad I remembered to bookmark it.</i>
-
-Tom: <i>Cool, can you give it to me?</i>
-
-Bill: <i>http://waterblasters.com/cgi-bin/htmlos.cgi/001149.3.317303135718820096?id=543</i>
-
-Tom: <i>Was that slash cgi slash oh oh one one or was it zero zero one one?</i>
 
 Introducing Route
 -----------------
