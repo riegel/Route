@@ -1,28 +1,3 @@
-<style>
-pre,
-code {
- display: block;
- overflow-y:auto;
- overflow-x: auto;
- font-size:9pt;
- margin:0;
- margin-top:.5em;
- margin-bottom:.5em;
- font-family: monospace;
- white-space: pre; 
- background-color: #eeeeee;
- color: #000;
- border: 1px solid #666;
- -moz-border-radius: .4em;
- -webkit-border-radius: .4em;
- border-radius: .4em;
- padding: .5em;
-}
-li {margin-bottom:1em;}
-a[id] {color:red;}
-</style>
-
-<span id="top"></span>
 Route For HTML/OS
 ========================
 Two Simple Illustrations
@@ -64,7 +39,6 @@ _Note:_ Throughout this article we may use a capital R and other times a lowerca
 
 
 
-<span id="installing"><a href="#top">Back to top</a></span>
 Installation
 =========================
 Route is available as an Aestiva .bb file and can be downloaded here...
@@ -102,7 +76,6 @@ _Note:_ If you have trouble with your Route installation, you should be able to 
 
 
 
-<span id="understanding"><a href="#top">Back to top</a></span>
 Understanding routes
 =========================
 Flowchart
@@ -122,7 +95,6 @@ _Note:_ Having Route installed will not affect (unless the site relies on .htacc
 
 
 
-<span id="programming"><a href="#top">Back to top</a></span>
 Programming routes
 ===========================
 Handling routes
@@ -192,7 +164,6 @@ Instead of _goto page_ add something like this.
 
 
 
-<span id="considerations"><a href="#top">Back to top</a></span>
 Additional Considerations
 ==========================
 Search Engines
@@ -257,7 +228,6 @@ Here is what they contain...
 
 
 
-<span id="underthehood"><a href="#top">Back to top</a></span>
 Route Under The Hood
 ==================
 
@@ -388,5 +358,3 @@ This is a sample of what the web.config file might look like. Not intended for a
  &lt;/system.webServer&gt;
 &lt;/configuration&gt;
 </pre>
-
-[/minicontact/individual/10385]
