@@ -8,7 +8,7 @@ _Consider these two URL's_
 
 Introducing Route
 -----------------
-These two albeit contrived examples illustrate that it is desirable to have URL's that are easy to remember and easy to bookmark, oh and also search engine friendly.
+This examples illustrates that it is desirable to have URL's that are easy to remember and easy to bookmark, oh and also search engine friendly.
 
 Route provides HTML/OS powered websites a framework to keep URL's simple. This is oftentimes reffered to as a Model View Contoller or MVC.
 
