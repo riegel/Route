@@ -1,0 +1,6 @@
+<<overlay restart
+ temp=split(getlink('/apps/route/index.html'),'/')
+ temp=temp[1,rows(temp)]
+ ci_cookiewrite('route_controller',temp,adddays(now,-365))
+ goto '/apps/route/restart.html'
+>>

@@ -1,0 +1,12 @@
+ URL=getenv('SCRIPT_NAME')+getenv('PATH_INFO')
+ if getenv('QUERY_STRING')<>'ERROR' and getenv('QUERY_STRING')<>'' then
+  URL=URL+'?'+getenv('QUERY_STRING')
+ /if
+
+ # Determine if route handles this restart link /#
+ if count(URL,'?_/')>0 or count(URL,'/_/')>0 then temp='route' else temp='     ' /if
+
+ # Log the restart /#
+ append now+' '+temp+' '+tag+' '+url+' end'+lf to file="/apps/route/restart.log" /append
+
+ if temp='route' then goto '/apps/route/index.html' /if

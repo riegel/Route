@@ -1,0 +1,129 @@
+expand file="/system/clearimage/DLL.lib" /expand
+
+# ---------------------------------------------------------------------------------------------------------
+  route URLS have 2 possible forms...
+  http://example.com/blog/show/25?id=52&name=terry                                      (using cookies)
+    -or-
+  http://example.com/0012436.3.059416195110177959/_/blog/show/25?id=52&name=terry       (cookies disabled)
+  ---------------------------------------------------------------------------------------------------------
+
+  tag         ==>  /video/show/25?id=52&name=terry      <--- This is a text string
+                   +-------------+
+  tag_        ==>  |video|show|25|                      <--- This is a table
+                   +-------------+
+  tag_end     ==>  3                                    <--- cols(tag_)
+
+  tag_vars    ==>  id=52&name=terry
+
+  route('/video/show/25?id=52&name=terry') <-- Use this inplace of getlink()
+
+  route() is found in /system/clearimage/DLL.lib
+/#
+
+
+
+
+
+function route_whatURI() locals t,x,a,m,o,temp do
+
+ URL=getenv('SCRIPT_NAME')+getenv('PATH_INFO')
+ if getenv('QUERY_STRING')<>'ERROR' and getenv('QUERY_STRING')<>'' then
+  URL=URL+'?'+getenv('QUERY_STRING')
+ /if
+ if count(URL,'/_/')>0 then
+  tag=replace(chopleft(URL,'/_/'),'/_','')
+ elif count(URL,'?_/')>0 then
+  tag=replace(replace(chopleft(URL,'?_/'),'?_',''),'&','?')
+ else
+  tag=URL
+ /if
+
+ tag=parsetag(tag)
+ tag_           = tagresults_
+ tag_path       = tagresults_path
+ tag_controller = tagresults_controller
+ tag_action     = tagresults_action
+ tag_vars       = tagresults_vars
+ tag_end        = tagresults_end
+
+
+ if tag_controller<>'' and tag_controller<>'ERROR' and tag_controller<>'/' then
+  if isfile('/'+tag_controller)='TRUE' then goto error(409) /if
+  if isdir( '/'+tag_controller)='TRUE' then goto error(409) /if
+ /if
+
+
+ return '' /return
+/function
+
+
+function parsetag(tag) locals t,x,a,m,temp do
+ m=split(tag,'?')
+ t=listtorow(m[1,1],'/')
+ tagresults_path=m[1,1]
+ tagresults_controller=t[2+0,1]
+ tagresults_action=t[3+0,1]
+ tagresults_vars=m[1,2] if tagresults_vars='' then tagresults_vars='ERROR' /if
+ tagresults_=gettable(t,2+0,cols(t),1,1)
+ tagresults_end=cols(tagresults_)
+ return tag /return
+/function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if iconpage='ERROR' then
+ temp1=split(getlink("/apps/route/index.html"),'/')
+ ci_cookiewrite('route_controller',temp1[1,rows(temp1)],adddays(now,365))
+/if
+
+
+
+
+
+
+
+
+
+
+
+
+if page="/apps/route/index.html" then
+ route_whatURI()
+ temp=rows(history)
+ if temp>10 then history=gettable(history,1,1,temp-10,temp) /if
+ if tag<>history[1,rows(history)] then
+  history=appends(history,tag)
+ /if
+/if
+
+
+
+
+
+
+
+
+

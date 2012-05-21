@@ -1,0 +1,377 @@
+<<
+ setupRouteLOG='/apps/route/setup/routesetup.log'
+ sysmd('/apps/route/controllers')
+ if not(isfile('/apps/route/controllers/home.overlay')) then
+  syscp('/apps/route/setup/controllers/home.overlay','/apps/route/controllers/home.overlay')
+ /if
+ if not(isfile('/apps/route/controllers/restart.overlay')) then
+  syscp('/apps/route/setup/controllers/restart.overlay','/apps/route/controllers/restart.overlay')
+ /if
+ if not(isfile('/apps/route/controllers/http_error.overlay')) then
+  syscp('/apps/route/setup/controllers/http_error.overlay','/apps/route/controllers/http_error.overlay')
+ /if
+ if not(isfile('/apps/route/index.html')) then
+  syscp('/apps/route/setup/index.html','/apps/route/index.html')
+ /if
+
+
+ # BEGIN Determine if route is installed and working /#
+ installfinished='ERROR'
+ if fromoverlay<>'TRUE' then
+  temp2=netweb(syspublicurl+'/apps/route/setup/test.txt',3000,10,'GET','','')
+  if temp2='PASS' and routeoverride='ERROR' then installfinished='TRUE' /if
+ /if
+ # END   Determine if route is installed and working /#
+
+ expand file="/apps/route/setup/dll.lib" /expand
+ append lf to file=setupRouteLOG /append
+ sysfixprivate(setupRouteLOG)
+ if installfinished="TRUE" then
+   message=^
+      <p>Setup is complete. <a href="^+page+^" name="routeoverride" value="TRUE">Reinstall</a>.</p>
+      <p>Route is an advanced controller framework for HTML/OS. It takes regular HTML/OS sites and creates beautifully crafted URL's that are easy to bookmark, easy to remember and are search engine friendly.</p>
+      <p>View <a href="^+syspublicurl+^" target="new">^+syspublicurl+^</a> to verify things are working.</p>
+      <p>View the log file here. ^+ci_edit2(setupRouteLOG,800,600,setupRouteLOG,'READONLY')+^.</p>
+      <p><i>^+usernum+^</i></p>^
+   navigate=^^
+   nextoverlay='ERROR'
+ else
+  if fromoverlay<>'TRUE' then
+   message=^
+      <p>Route is an advanced controller framework for HTML/OS. It takes regular HTML/OS sites and creates beautifully crafted URL's that are easy to bookmark, easy to remember and are search engine friendly.</p>
+      <p>Setup will determine if your server will support Route for HTML/OS. A temporary .htaccess or web.config file will be created netweb will be used to determine if it is working or not.</p>
+      <p>All file system functions are logged to ^+ci_edit2(setupRouteLOG,800,600,setupRouteLOG,'READONLY')+^.</p>
+      <p><i>^+usernum+^</i></p>^
+   navigate=^     <input type="submit" name="mybutton" value="Begin">^
+   nextoverlay=1
+  elif fromoverlay='TRUE' then
+   if nextoverlay=2 then
+
+    if getenv('REQUEST_URI')='ERROR' then
+     temp2=netweb(syspublicurl+'/apps/route/setup/test.txt',3000,10,'GET','','')
+     if temp2='PASS' then message=message+'<hr><p>PASS: web.config files are being parsed on this server. Setup can proceed.</p>' /if
+     if tempfname='ERROR' then
+      sysrm('/web.config')
+     else
+      copy file=tempfname to temp00 /copy
+      savetext('/web.config','PUBLIC',TEMP00)
+     /if
+     result=result+simplelog("copy file='"+tempfname+"' to temp00 /copy",setupRouteLOG)
+     result=result+simplelog("savetext('/web.config','PUBLIC',TEMP00)",setupRouteLOG)
+    else
+     temp2=netweb(syspublicurl+'/apps/route/setup/test.txt',3000,10,'GET','','')
+     if temp2='PASS' then message=message+'<hr><p>PASS: .htaccess files are being parsed on this server. Setup can proceed.</p>' /if
+     copy file=tempfname to temp00 /copy
+     savetext('/.htaccess','PUBLIC',TEMP00)
+     result=result+simplelog("copy file='"+tempfname+"' to temp00 /copy",setupRouteLOG)
+     result=result+simplelog("savetext('/.htaccess','PUBLIC',TEMP00)",setupRouteLOG)
+    /if
+
+
+   /if
+  /if
+ /if
+ fromoverlay='ERROR'
+
+>>
+
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8">
+  <title>Route Setup</title>
+  <style>
+   body        {font:14px/20px 'Helvetica', Arial, sans-serif; min-width:600px; margin:0; padding:35px 0 0 0; text-align:left; background-color:#eeeeee;}
+   img         {padding: 0 20px 20px 20px;}
+   .wrapper    {padding:20px 0 20px 0; width:600px; margin:0 auto 10px auto; text-align:left; height: 400px; overflow:none; background-color:#bbb;}
+   .container  {position:relative; width:560px; height:285px; overflow: auto; border-width:0 !important; border-color:transparent !important; margin:0; padding:20px; padding-top:5px; text-align:left; -moz-box-shadow:2px 2px 4px rgba(0,0,0,0.1); -webkit-box-shadow:2px 2px 4px rgba(0,0,0,0.1); box-shadow:2px 2px 4px rgba(0,0,0,0.1); background-color:#FFFFFF;}
+   .rounded8   {-moz-border-radius:8px;border-radius:8px;-webkit-border-radius:8px;}
+   .buttons    {text-align:right;padding:10px;}
+  </style>
+ </head>
+ <body>
+  <form action="<<'overlay'+nextoverlay>>" method="post">
+   <div class="wrapper rounded8">
+    <img src="/apps/route/images/route48x48.png" width="48" height="48" border="0" style="float: left;">
+    <h1>Route Setup</h1>
+    <div class="container rounded6">
+     <<message>>
+    </div>
+    <div class="buttons">
+     <<navigate>>
+    </div>
+   </div>
+  </form>
+
+<pre>
+
+
+
+ Notes:
+
+ It is strongly recommended that cookie security be turned off. If it is left on then
+ search engines will not be able to crawl your route URL's.
+
+
+</pre>
+
+ </body>
+</html>
+<<overlay overlay0
+ fromoverlay="ERROR"
+ goto page 
+>>
+
+<<overlay overlay1
+  fromoverlay="TRUE"
+  if mybutton="Back" then mybutton="ERROR" nextoverlay=nextoverlay-2 goto getlink('overlay'+nextoverlay) /if
+
+
+  result=result+simplelog("############### Begin Verification ##################",setupRouteLOG)
+
+
+  if getenv('REQUEST_URI')='ERROR' then
+
+   # use web.config /#
+   # Back up web.config /#
+if isfile('/web.config') then
+   sysrm('/web.config')
+   temp00=loadtext('/web.config','PUBLIC')
+   if temp00<>'' and temp00<>'ERROR' then
+    filenewdir('/apps/route/setup/back')
+    tempfname='/apps/route/setup/back/web.configBACK'+aestivafilename(now+':'+right('X00'+tagresults[7],2))+'.txt'
+    copy temp00 to file=tempfname /copy
+    result=result+simplelog("temp00=loadtext('/web.config','PUBLIC')",setupRouteLOG)
+    result=result+simplelog("copy temp00 to file='"+tempfname+"' /copy",setupRouteLOG)
+    sysfixprivate(tempfname)
+   /if
+else
+ tempfname='ERROR'
+/if
+   copy 'FAIL' to file='/apps/route/setup/test.txt'      /copy sysfixpublic('/apps/route/setup/test.txt'     )
+   copy 'PASS' to file='/apps/route/setup/testROUTE.txt' /copy sysfixpublic('/apps/route/setup/testROUTE.txt')
+   temp1=netweb(syspublicurl+'/apps/route/setup/test.txt',3000,10,'GET','','')
+   temp='<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <rewrite>
+            <rules>
+                <rule name="Test Rewrite Rules" stopProcessing="true">
+                    <match url="^apps/route/setup/test.txt$" ignoreCase="false" />
+                    <action type="Rewrite" url="/apps/route/setup/testROUTE.txt" />
+                </rule>
+            </rules>
+        </rewrite>
+    </system.webServer>
+</configuration>'
+   savetext('/web.config','PUBLIC',temp)
+   result=result+simplelog("savefile('/web.config','PUBLIC','"+replaceall(temp,lf,"'+lf+'")+"')",setupRouteLOG)
+
+
+  else
+
+
+   # use .htaccess /#
+   # Back up .htaccess /#
+   temp00=loadtext('/.htaccess','PUBLIC')
+   if temp00<>'' and temp00<>'ERROR' then
+    filenewdir('/apps/route/setup/back')
+    tempfname='/apps/route/setup/back/htaccessBACK'+aestivafilename(now+':'+right('X00'+tagresults[7],2))+'.txt'
+    copy temp00 to file=tempfname /copy
+    result=result+simplelog("temp00=loadtext('/.htaccess','PUBLIC')",setupRouteLOG)
+    result=result+simplelog("copy temp00 to file='"+tempfname+"' /copy",setupRouteLOG)
+    sysfixprivate(tempfname)
+   /if
+   copy 'FAIL' to file='/apps/route/setup/test.txt'      /copy sysfixpublic('/apps/route/setup/test.txt'     )
+   copy 'PASS' to file='/apps/route/setup/testROUTE.txt' /copy sysfixpublic('/apps/route/setup/testROUTE.txt')
+   savetext('/.htaccess','PUBLIC','# PUBLIC Side of HTML/OS')
+   temp1=netweb(syspublicurl+'/apps/route/setup/test.txt',3000,10,'GET','','')
+   temp='RewriteEngine on'+lf+
+        'RewriteRule ^apps/route/setup/test.txt$ /apps/route/setup/testROUTE.txt [L]'
+   savetext('/.htaccess','PUBLIC',temp)
+   result=result+simplelog("savefile('/.htaccess','PUBLIC','"+replaceall(temp,lf,"'+lf+'")+"')",setupRouteLOG)
+  /if
+
+
+  if temp1='FAIL' then
+   message='Setup has copied a temporary .htaccess or web.config file to the root directory of this server. This will determine if it is being parsed...'
+   navigate=^     <input type="submit" name="mybutton" value="Back"> <input type="submit" name="mybutton" value="Finish">^
+  else
+   if temp1='PASS' then
+    message='<p>Setup is able to read a file with netweb. Unexpected response recieved. Unable to continue. Remove /.htaccess then try again.</p>'
+   else
+    message='<p>Setup is unable to read a file with netweb. This is necessary to setup Route. Unable to continue.</p>'
+   /if
+   navigate=^     <input type="submit" name="mybutton" value="Back">^
+  /if
+
+
+  nextoverlay=nextoverlay+1
+  goto page
+>>
+
+<<overlay overlay2
+  fromoverlay="TRUE"
+  if mybutton="Back" then mybutton="ERROR" nextoverlay=nextoverlay-2 goto getlink('overlay'+nextoverlay) /if
+
+  result=''
+  result=result+simplelog("############### Begin Installation ##################",setupRouteLOG)
+
+
+if getenv('REQUEST_URI')='ERROR' then
+  # Step 1 Create web.config /#
+  homedir=filelist('/')
+  dirSection='                        <add input="{URL}" pattern="^/'+cginame+'" negate="true" />'+lf+
+             '                        <add input="{URL}" pattern="^/clearimage" negate="true" />'
+  for name=homedir rowname=tfile do
+   if tfile[5]='PUBLIC' or tfile[5]='MIRROR' then
+    if tfile[1]<>'clearimage' and tfile[1]<>'web.config' then
+     dirsection=dirsection+lf+'                        <add input="{URL}" pattern="^/'+tfile[1]+'" negate="true" />'
+    /if
+   /if
+  /for
+
+  temp='<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Route Comments
+     web.config is a part of the Clear Image Media Routing Package for HTML/OS
+     contact riegel@clearimageonline.com with any questions
+
+     copyright (c) July 2011
+     Update March 2012
+
+     This .htaccess is autogenerated by /apps/route/setup/setup.html
+     use it to make modifications
+     /Route Comments
+-->
+<configuration>
+    <system.webServer>
+        <httpErrors>
+            <remove statusCode="403" subStatusCode="-1" />      
+            <remove statusCode="404" subStatusCode="-1" />                
+            <error statusCode="403" path="/apps/route/errors/403_error.html" responseMode="ExecuteURL" />
+            <error statusCode="404" path="/apps/route/errors/404_error.html" responseMode="ExecuteURL" />                
+        </httpErrors>
+        <rewrite>
+            <rules>
+                <rule name="Test Rewrite Rules" stopProcessing="true">
+                    <match url="^apps/route/setup/test.txt$" ignoreCase="false" />
+                    <action type="Rewrite" url="/apps/route/setup/testROUTE.txt" />
+                </rule>
+                <rule name="Hidden CGI-BIN" stopProcessing="true">
+                    <match url="^([0-9]+\.[0-9]+\.[0-9]+)(.*)$" ignoreCase="false" />
+                    <action type="Rewrite" url="'+cginame+'/'+syshtmlosname+'/{R:1}{R:2}" />
+                </rule>
+
+                <rule name="Cookie found rewrite rule">
+                    <match url="^(.*)$" ignoreCase="false" />
+                    <conditions logicalGrouping="MatchAll">
+'+dirsection+'
+                        <add input="{HTTP_COOKIE}" pattern="route_controller=([^;]+)" />
+                    </conditions>
+                    <action type="Rewrite" url="/'+cginame+'/'+syshtmlosname+'/{C:1}/_/{R:1}" />
+                </rule>
+                <rule name="Cookie NOT found rewrite rule">
+                    <match url="^(.*)$" ignoreCase="false" />
+                    <conditions logicalGrouping="MatchAll">
+'+dirsection+'
+                        <add input="{HTTP_COOKIE}" pattern="^.*route_controller.*$" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/'+cginame+'/'+syshtmlosname+'/apps/route/startlink.html?_/{R:1}" appendQueryString="true" />
+                </rule>
+            </rules>
+        </rewrite>
+    </system.webServer>
+</configuration>'
+temp=replaceall(temp,lf,cr+lf)
+  savetext('/web.config','PUBLIC',temp) rootht=temp
+  savetext('/web_config.txt','PUBLIC',temp) rootht=temp
+  result=result+simplelog("Create /web.config",setupRouteLOG)
+
+
+
+
+else
+  # Step 1 Create .htaccess /#
+  homedir=filelist('/')
+  dirSection='  RewriteCond %{REQUEST_URI} !^/'+cginame+' [NC]'+lf+
+             '  RewriteCond %{REQUEST_URI} !^/clearimage [NC]'
+  for name=homedir rowname=tfile do
+   if tfile[5]='PUBLIC' or tfile[5]='MIRROR' then
+    if tfile[1]<>'.htaccess' and tfile[1]<>'clearimage' then
+     dirsection=dirsection+lf+'  RewriteCond %{REQUEST_URI} !^/'+tfile[1]+' [NC]'
+    /if
+   /if
+  /for
+
+  temp='
+  # Route Comments
+  # .htaccess is a part of the Clear Image Media Routing Package for HTML/OS
+  # contact riegel@clearimageonline.com with any questions
+  #
+  # copyright (c) July 2011
+  # Update March 2012
+  #
+  # This .htaccess is autogenerated by /apps/route/setup/setup.html
+  # use it to make modifications
+  # /Route Comments
+
+  RewriteEngine on
+
+  #########################
+  # Custom Errors
+  #
+  ErrorDocument 404 /apps/route/errors/404_error.html
+  ErrorDocument 403 /apps/route/errors/403_error.html
+
+  #########################
+  # Test Rewrite Rules
+  #
+  RewriteRule ^apps/route/setup/test.txt$ /apps/route/setup/testROUTE.txt [L]
+
+  #########################
+  # Hidden CGI-BIN
+  #
+  RewriteRule ^([0-9]+\.[0-9]+\.[0-9]+)(.*)$ '+cginame+'/'+syshtmlosname+'/$1$2 [L]
+
+  #########################
+  # Cookie found rewrite rule
+  #
+'+dirsection+'
+  RewriteCond %{HTTP_COOKIE} route_controller=([^;]+) [NC]
+  RewriteRule ^(.*)$ /'+cginame+'/'+syshtmlosname+'/%1/_/$1 [L]
+
+  #########################
+  # Cookie NOT found rewrite rule
+  #
+'+dirsection+'
+  RewriteCond %{HTTP_COOKIE} !^.*route_controller.*$ [NC]
+  RewriteRule ^(.*)$ '+cginame+'/'+syshtmlosname+'/apps/route/startlink.html?_/$1 [L,QSA]
+
+  # /Route Directives'+lf
+
+  savetext('/.htaccess','PUBLIC',temp) rootht=temp
+  result=result+simplelog("Create /.htaccess",setupRouteLOG)
+/if
+
+
+  # Step 2 Add restart library /#
+  rs=addrestartexpand(^/apps/route/restart.lib^)
+  result=result+simplelog(^syscp('/system/rs.html','/system/rsAESTIVA.html')^,setupRouteLOG)
+  result=result+simplelog(^copy '^+rs+^' /copy^,setupRouteLOG)
+  
+  # Step 3 Add startlink for new sessions /#
+  addstartlink('/apps/route/startlink.html',"","N")
+  result=result+simplelog(^addstartlink('/apps/route/startlink.html',"","N")^,setupRouteLOG)
+
+  result=result+simplelog("Create /router/.htaccess",setupRouteLOG)
+  result=result+simplelog("############## NEW /.htaccess ##############"+lf+rootht,setupRouteLOG)
+  result=result+simplelog("############################################"+lf+lf+lf+lf,setupRouteLOG)
+  result=result+simplelog("############################################",setupRouteLOG)
+
+  message=^<p>Congratulations!. Setup is complete.</p><p>View <a href="^+syspublicurl+^" target="new">^+syspublicurl+^</a> to verify things are working.</p>^+lf+
+          ^<p>View the log file. ^+ci_edit2(setupRouteLOG,800,600,setupRouteLOG,'READONLY')+^</p>^
+  navigate=^^
+  nextoverlay='ERROR'
+  goto page
+>>

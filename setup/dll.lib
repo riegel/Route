@@ -1,0 +1,69 @@
+# BEGIN DLL.lib automatic install / update code /#
+if DLLVersion<>'Up To Date' then
+ if isfile('/system/clearimage/DLL.lib') then
+  expand file='/system/clearimage/DLL.lib' /expand
+  server_version()
+  dll_version=dll_version()
+ else
+  dll_version=0
+  DLL_serverversion=1
+  CI_serverversion=0
+ /if
+ if DLL_serverversion<>dll_version and domainname<>'clearimageonline.com' then
+  #--- Update DLL.lib --- /#
+  if not(isdir('/system/clearimage/')) then
+   sysmd('/system/clearimage/')
+  /if
+  thefile='/system/clearimage/DLL.bb'
+  temp=NETWEB('clearimageonline.com/home/DLL.bb',50000000,600,'GET','','',thefile)
+  fpl=FILEPACKLIST(thefile)
+  temp=fileunpack(thefile,'/system/clearimage/','')
+  sysfixprivate('/system/clearimage/app_install.txt')
+  DLLversion.lib="ERROR"
+  expand file='/system/clearimage/DLL.lib' /expand
+  server_version()
+  dll_version=dll_version()
+ else
+  DLLVersion='Up To Date'
+ /if
+/if
+# END   DLL.lib automatic install / update code /#
+
+
+function simplelog(text,fname) do
+ append now+' '+text+lf to file=fname /append
+ return now+' '+text+lf /return
+/function
+
+
+function addrestartexpand(addex) do
+
+ if isfile(addex) then
+  addex=^#expand/# if isfile("^+addex+^") then expand file="^+addex+^" /expand /if^
+ /if
+
+ if ISSCRAMBLE('/system/rs.html') then
+  syscp('/system/rs.html','/system/rsAESTIVA.html')
+ /if
+ copy file='/system/rs.html' to rs /copy
+ if rs='' or rs='ERROR' then
+  rs='<<'+lf+
+     ' if isfile("/system/rsAESTIVA.html") then goto "/system/rsAESTIVA.html" /if'+lf+
+     '>>'
+ /if
+ rs=split(rs,lf)
+ ex='ERROR' found='ERROR'
+ for name=rs rowname=x do
+  if left(x[1],6)='expand' then ex=appends(ex,x) /if
+  if left(x[1],9)='#expand/#' then ex=appends(ex,x) /if
+  if x[1]=addex then found='TRUE' /if
+ /for
+ if found='ERROR' then ex=appends(ex,addex) /if
+ rs=''
+ for name=ex rowname=x do
+  rs=rs+x[1]+lf
+ /for
+ rs='<<'+lf+rs+'if isfile("/system/rsAESTIVA.html") then goto "/system/rsAESTIVA.html" /if'+lf+'>>'
+ copy rs to file='/system/rs.html' /copy
+/function
+

@@ -1,0 +1,35 @@
+<<
+################################
+# Load Libraries               #
+############################# /#
+  expand file="/apps/route/index.lib" /expand
+
+
+
+################################
+# determine routing            #
+#                              #
+# Use this page to determine   #
+# all routing                  #
+#                              #
+############################# /#
+
+
+
+
+if tag_[1]='' then
+ goto Controller('home')
+/if
+
+if tag_[1]='ref' then
+ if tag_[2]='' or tag_[2]='ERROR' then
+  ThisChap='htmlos_desktop.sys'
+ else
+  thistag=tag_[2]
+ /if
+ goto '/apps/reference/index.html'
+/if
+
+goto Controller(tag_[1])
+
+>>
