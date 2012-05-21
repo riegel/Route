@@ -1,3 +1,5 @@
+This README can be found <a href="http://webblocks.co/route">here</a>.
+
 Route For HTML/OS
 ========================
 Why?
